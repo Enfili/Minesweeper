@@ -46,6 +46,26 @@ public class Field {
         generate();
     }
 
+    public int getRowCount() {
+        return rowCount;
+    }
+
+    public int getColumnCount() {
+        return columnCount;
+    }
+
+    public int getMineCount() {
+        return mineCount;
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public Tile getTile(int row, int column) {
+        return tiles[row][column];
+    }
+
     /**
      * Opens tile at specified indeces.
      *
@@ -75,7 +95,12 @@ public class Field {
      * @param column column number
      */
     public void markTile(int row, int column) {
-        throw new UnsupportedOperationException("Method markTile not yet implemented");
+        Tile tile = tiles[row][column];
+        if (tile.getState() == Tile.State.CLOSED) {
+            tile.setState(Tile.State.OPEN);
+        } else if (tile.getState() == Tile.State.MARKED) {
+            tile.setState(Tile.State.CLOSED);
+        }
     }
 
     /**
