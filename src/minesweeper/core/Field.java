@@ -1,5 +1,7 @@
 package minesweeper.core;
 
+import java.util.Random;
+
 /**
  * Field represents playing field and game logic.
  */
@@ -45,6 +47,11 @@ public class Field {
         //generate the field content
         generate();
     }
+
+    /**
+     * getters for rowCount, columnCount, mineCount, state of the game
+     * and concrete tile
+     */
 
     public int getRowCount() {
         return rowCount;
@@ -107,7 +114,41 @@ public class Field {
      * Generates playing field.
      */
     private void generate() {
-        throw new UnsupportedOperationException("Method generate not yet implemented");
+        int nbOfMines = 0;
+        Random r = new Random();
+        while (nbOfMines < mineCount) {
+            int row = r.nextInt(rowCount);
+            int column = r.nextInt(columnCount);
+            if (tiles[row][column] == null) {
+                tiles[row][column] = new Mine();
+                nbOfMines++;
+            }
+        }
+
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < columnCount; j++) {
+                if (tiles[i][j] == null) {
+                    int adjacentMines = countAdjacentMines(i, j);
+                    tiles[i][j] = new Clue(adjacentMines);
+                }
+            }
+        }
+
+//        for (int i = 0; i < rowCount; i++) {
+//            for (int j = 0; j < columnCount; j++) {
+//                if (tiles[i][j] == null)
+//                    System.out.print("_");
+//                else if (tiles[i][j] instanceof Clue) {
+//                    if (((Clue) tiles[i][j]).getValue() > 0)
+//                        System.out.print(((Clue) tiles[i][j]).getValue());
+//                    else
+//                        System.out.print("_");
+//                } else {
+//                    System.out.print("M");
+//                }
+//            }
+//            System.out.println();
+//        }
     }
 
     /**
