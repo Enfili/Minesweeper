@@ -3,7 +3,10 @@ package minesweeper.consoleui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import minesweeper.core.Clue;
 import minesweeper.core.Field;
+import minesweeper.core.Tile;
 
 /**
  * Console user interface.
@@ -44,6 +47,14 @@ public class ConsoleUI {
      * Updates user interface - prints the field.
      */
     public void update() {
+//        int rowCount = field.getRowCount();
+//        int columnCount = field.getColumnCount();
+//        for (int i = 0; i < rowCount; i++) {
+//            for (int j = 0; j < columnCount; j++) {
+//                System.out.print(field.getTile(i, j));
+//            }
+//            System.out.println();
+//        }
 //        throw new UnsupportedOperationException("Method update not yet implemented");
     }
     

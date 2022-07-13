@@ -3,7 +3,7 @@ package minesweeper.core;
 /**
  * Clue tile.
  */
-public class Clue  extends Tile {
+public class Clue extends Tile {
     /** Value of the clue. */
     private final int value;
     
@@ -15,7 +15,15 @@ public class Clue  extends Tile {
         this.value = value;
     }
 
+    /**
+     * getter for value
+     */
     public int getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return value + " ";
     }
 }

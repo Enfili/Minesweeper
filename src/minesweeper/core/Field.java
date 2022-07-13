@@ -46,6 +46,13 @@ public class Field {
 
         //generate the field content
         generate();
+
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < columnCount; j++) {
+                System.out.print(tiles[i][j]);
+            }
+            System.out.println();
+        }
     }
 
     /**
@@ -128,27 +135,10 @@ public class Field {
         for (int i = 0; i < rowCount; i++) {
             for (int j = 0; j < columnCount; j++) {
                 if (tiles[i][j] == null) {
-                    int adjacentMines = countAdjacentMines(i, j);
-                    tiles[i][j] = new Clue(adjacentMines);
+                    tiles[i][j] = new Clue(countAdjacentMines(i, j));
                 }
             }
         }
-
-//        for (int i = 0; i < rowCount; i++) {
-//            for (int j = 0; j < columnCount; j++) {
-//                if (tiles[i][j] == null)
-//                    System.out.print("_");
-//                else if (tiles[i][j] instanceof Clue) {
-//                    if (((Clue) tiles[i][j]).getValue() > 0)
-//                        System.out.print(((Clue) tiles[i][j]).getValue());
-//                    else
-//                        System.out.print("_");
-//                } else {
-//                    System.out.print("M");
-//                }
-//            }
-//            System.out.println();
-//        }
     }
 
     /**
