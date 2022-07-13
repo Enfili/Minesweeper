@@ -47,7 +47,13 @@ public class Field {
         //generate the field content
         generate();
 
+        System.out.print("  ");
+        for (int i = 0; i < columnCount; i++)
+            System.out.print(i + " ");
+        System.out.println();
+        int letter = 65;
         for (int i = 0; i < rowCount; i++) {
+            System.out.print((char) (letter + i) + " ");
             for (int j = 0; j < columnCount; j++) {
                 System.out.print(tiles[i][j]);
             }

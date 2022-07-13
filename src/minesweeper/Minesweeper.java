@@ -8,7 +8,7 @@ import minesweeper.core.Field;
  */
 public class Minesweeper {
     /** User interface. */
-    private ConsoleUI userInterface;
+    private UserInterface userInterface;
  
     /**
      * Constructor.
@@ -25,6 +25,7 @@ public class Minesweeper {
      * @param args arguments
      */
     public static void main(String[] args) {
+//        System.out.println("Hello user with name: " + System.getProperty("user.name"));
         new Minesweeper();
     }
 }
