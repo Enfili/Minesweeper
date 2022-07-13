@@ -33,4 +33,9 @@ public abstract class Tile {
     void setState(State state) {
         this.state = state;
     }
+
+    @Override
+    public String toString() {
+        return "-";
+    }
 }

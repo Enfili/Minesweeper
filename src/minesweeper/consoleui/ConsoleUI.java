@@ -3,6 +3,7 @@ package minesweeper.consoleui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Random;
 
 import minesweeper.UserInterface;
 import minesweeper.core.Field;
@@ -48,15 +49,27 @@ public class ConsoleUI implements UserInterface {
      */
     @Override
     public void update() {
-//        int rowCount = field.getRowCount();
-//        int columnCount = field.getColumnCount();
-//        for (int i = 0; i < rowCount; i++) {
-//            for (int j = 0; j < columnCount; j++) {
-//                System.out.print(field.getTile(i, j));
-//            }
-//            System.out.println();
-//        }
-//        throw new UnsupportedOperationException("Method update not yet implemented");
+        int columnCount = field.getColumnCount();
+        int rowCount = field.getRowCount();
+
+        System.out.print("  ");
+        for (int i = 0; i < columnCount; i++)
+            System.out.printf("%d ", i);
+        System.out.println();
+        int letter = 65;
+        for (int i = 0; i < rowCount; i++) {
+            System.out.print((char) (letter + i) + " ");
+            for (int j = 0; j < columnCount; j++) {
+                System.out.printf("%s ", field.getTile(i, j));
+            }
+            System.out.println();
+        }
+
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**

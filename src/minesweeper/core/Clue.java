@@ -24,6 +24,10 @@ public class Clue extends Tile {
 
     @Override
     public String toString() {
-        return value + " ";
+        if (getState() == State.CLOSED)
+            return super.toString();
+        else if (getState() == State.MARKED)
+            return "M";
+        return Integer.toString(value);
     }
 }
