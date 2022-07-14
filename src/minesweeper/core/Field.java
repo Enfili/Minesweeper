@@ -133,6 +133,7 @@ public class Field {
             }
         }
 
+        //todo: erase later
         for (int i = 0; i < 3 * rowCount; i++) {
             tiles[r.nextInt(rowCount)][r.nextInt(columnCount)].setState(Tile.State.OPEN);
         }

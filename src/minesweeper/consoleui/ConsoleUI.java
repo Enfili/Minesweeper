@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import minesweeper.UserInterface;
 import minesweeper.core.Field;
@@ -12,9 +14,13 @@ import minesweeper.core.Field;
  * Console user interface.
  */
 public class ConsoleUI implements UserInterface {
+    public static final int LETTER_ASCII = 65;
+    public static final String REGEX_INPUT = "X|(M|O)([A-Z])(\\d)";
     /** Playing field. */
     private Field field;
-    
+
+    private String format = "%2s";
+
     /** Input reader. */
     private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
     
@@ -37,6 +43,7 @@ public class ConsoleUI implements UserInterface {
     @Override
     public void newGameStarted(Field field) {
         this.field = field;
+        this.format = "%" + (String.valueOf(field.getColumnCount()).length() + 1) + "s";
         do {
             update();
             processInput();
@@ -52,15 +59,15 @@ public class ConsoleUI implements UserInterface {
         int columnCount = field.getColumnCount();
         int rowCount = field.getRowCount();
 
-        System.out.print("  ");
+        System.out.printf(format, "");
         for (int i = 0; i < columnCount; i++)
-            System.out.printf("%d ", i);
+            System.out.printf("%2d", i);
         System.out.println();
-        int letter = 65;
+
         for (int i = 0; i < rowCount; i++) {
-            System.out.print((char) (letter + i) + " ");
+            System.out.printf("%2c", (LETTER_ASCII + i));
             for (int j = 0; j < columnCount; j++) {
-                System.out.printf("%s ", field.getTile(i, j));
+                System.out.printf(format, field.getTile(i, j));
             }
             System.out.println();
         }
@@ -77,6 +84,30 @@ public class ConsoleUI implements UserInterface {
      * Reads line from console and does the action on a playing field according to input string.
      */
     private void processInput() {
-//        throw new UnsupportedOperationException("Method processInput not yet implemented");
+        System.out.println("X – ukončenie hry, MA1 – označenie dlaždice v riadku A a stĺpci 1, OB4 – odkrytie dlaždice v riadku B a stĺpci 4");
+        String input = readLine();
+
+        Pattern pattern = Pattern.compile(REGEX_INPUT);
+        Matcher matcher = pattern.matcher(input);
+
+        if (!matcher.matches()) {
+            System.out.println("Neplatný ťah!");
+            processInput();
+        } else {
+            if (input.charAt(0) == 'X') {
+
+            } else  {
+                String[] actions = new String[3];
+                for (int i = 0; i < matcher.groupCount(); i++) {
+                    actions[i] = matcher.group(i);
+                }
+                int row = actions[1].charAt(0) - LETTER_ASCII;
+                //int column = String.valueOf(actions[2].charAt(0));
+                if (actions[0].equals("M")) {
+                } else {
+
+                }
+            }
+        }
     }
 }

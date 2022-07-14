@@ -7,10 +7,8 @@ public class Mine extends Tile {
 
     @Override
     public String toString() {
-        if (getState() == State.CLOSED)
-            return super.toString();
-        else if (getState() == State.MARKED)
-            return "M";
-        return "*";
+        if (getState() == State.OPEN)
+            return "*";
+        return super.toString();
     }
 }
