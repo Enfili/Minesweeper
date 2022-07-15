@@ -17,7 +17,7 @@ import minesweeper.core.Tile;
  */
 public class ConsoleUI implements UserInterface {
     public static final int LETTER_ASCII = 65;
-    public static final String REGEX_INPUT = "([moMO])([a-zA-Z])(\\d+)";
+    public static final Pattern PATTERN = Pattern.compile("([moMO])([a-zA-Z])(\\d+)");
     /** Playing field. */
     private Field field;
 
@@ -87,29 +87,29 @@ public class ConsoleUI implements UserInterface {
      */
     private void processInput() {
         System.out.println("X – ukončenie hry, MA1 – označenie dlaždice v riadku A a stĺpci 1, OB4 – odkrytie dlaždice v riadku B a stĺpci 4");
-        String input = readLine();
+        String input = readLine().toUpperCase();
 
         if (input.equals("X")) {
             System.exit(0);
         }
 
-        Pattern pattern = Pattern.compile(REGEX_INPUT);
-        Matcher matcher = pattern.matcher(input);
+        Matcher matcher = PATTERN.matcher(input);
 
-        if (!matcher.matches()) {
+        while (!matcher.matches()) {
             System.out.println("Neplatný ťah!");
-            processInput();
+            input = readLine().toUpperCase();
+            matcher = PATTERN.matcher(input);
+        }
+
+        for (int i = 1; i <= matcher.groupCount(); i++) {
+            System.out.println(matcher.group(i));
+        }
+        int row = matcher.group(2).charAt(0) - LETTER_ASCII;
+        int column = Integer.parseInt(matcher.group(3));
+        if (matcher.group(1).equals("M")) {
+            field.markTile(row, column);
         } else {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                System.out.println(matcher.group(i));
-            }
-            int row = matcher.group(2).toUpperCase().charAt(0) - LETTER_ASCII;
-            int column = Character.getNumericValue(matcher.group(3).toUpperCase().charAt(0));
-            if (matcher.group(1).equals("M")) {
-                field.markTile(row, column);
-            } else {
-                field.openTile(row, column);
-            }
+            field.openTile(row, column);
         }
     }
 }

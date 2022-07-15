@@ -91,7 +91,6 @@ public class Field {
 
             if (isSolved()) {
                 state = GameState.SOLVED;
-                return;
             }
         }
     }
@@ -105,7 +104,7 @@ public class Field {
     public void markTile(int row, int column) {
         Tile tile = tiles[row][column];
         if (tile.getState() == Tile.State.CLOSED) {
-            tile.setState(Tile.State.OPEN);
+            tile.setState(Tile.State.MARKED);
         } else if (tile.getState() == Tile.State.MARKED) {
             tile.setState(Tile.State.CLOSED);
         }
@@ -182,36 +181,15 @@ public class Field {
     }
 
     private void openAdjacentTiles(int row, int column) {
-        Tile tile = tiles[row][column];
-        tile.setState(Tile.State.OPEN);
+        for (int i = row - 1; i <= row + 1; i++) {
+            if (i < 0 || i >= rowCount)
+                continue;
+            for (int j = column - 1; j <= column + 1; j++) {
+                if (j < 0 || j >= columnCount)
+                    continue;
 
-        if (canBeOpenByAdjacentTile(row - 1, column - 1))
-            openAdjacentTiles(row - 1, column - 1);
-        if (canBeOpenByAdjacentTile(row - 1, column))
-            openAdjacentTiles(row - 1, column);
-        if (canBeOpenByAdjacentTile(row - 1, column + 1))
-            openAdjacentTiles(row - 1, column + 1);
-        if (canBeOpenByAdjacentTile(row, column - 1))
-            openAdjacentTiles(row, column - 1);
-        if (canBeOpenByAdjacentTile(row, column + 1))
-            openAdjacentTiles(row, column + 1);
-        if (canBeOpenByAdjacentTile(row + 1, column - 1))
-            openAdjacentTiles(row + 1, column - 1);
-        if (canBeOpenByAdjacentTile(row + 1, column))
-            openAdjacentTiles(row + 1, column);
-        if (canBeOpenByAdjacentTile(row + 1, column + 1))
-            openAdjacentTiles(row + 1, column + 1);
-    }
-
-    private boolean canBeOpenByAdjacentTile(int row, int column) {
-        if (row < 0 || row >= rowCount || column < 0 || column >= columnCount)
-            return false;
-        if (tiles[row][column].getState() == Tile.State.OPEN)
-            return false;
-        if (!(tiles[row][column] instanceof Clue))
-            return false;
-        if (((Clue) tiles[row][column]).getValue() != 0)
-            return false;
-        return true;
+                openTile(i, j);
+            }
+        }
     }
 }
