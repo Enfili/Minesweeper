@@ -180,6 +180,11 @@ public class Field {
         return count;
     }
 
+    public int getRemainingMineCount() {
+        int markedTiles = getNumberOf(Tile.State.MARKED);
+        return mineCount - markedTiles;
+    }
+
     private void openAdjacentTiles(int row, int column) {
         for (int i = row - 1; i <= row + 1; i++) {
             if (i < 0 || i >= rowCount)

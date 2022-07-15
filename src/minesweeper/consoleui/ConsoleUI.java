@@ -17,7 +17,7 @@ import minesweeper.core.Tile;
  */
 public class ConsoleUI implements UserInterface {
     public static final int LETTER_ASCII = 65;
-    public static final Pattern PATTERN = Pattern.compile("([moMO])([a-zA-Z])(\\d+)");
+    public static final Pattern PATTERN = Pattern.compile("([moMO])([a-zA-Z])(-?\\d+)");
     /** Playing field. */
     private Field field;
 
@@ -67,11 +67,12 @@ public class ConsoleUI implements UserInterface {
         int columnCount = field.getColumnCount();
         int rowCount = field.getRowCount();
 
+        System.out.println("Remaining number of mines: " + field.getRemainingMineCount());
+
         System.out.printf(format, "");
         for (int i = 0; i < columnCount; i++)
             System.out.printf("%2d", i);
         System.out.println();
-
         for (int i = 0; i < rowCount; i++) {
             System.out.printf("%2c", (LETTER_ASCII + i));
             for (int j = 0; j < columnCount; j++) {
@@ -87,18 +88,23 @@ public class ConsoleUI implements UserInterface {
      */
     private void processInput() {
         System.out.println("X – ukončenie hry, MA1 – označenie dlaždice v riadku A a stĺpci 1, OB4 – odkrytie dlaždice v riadku B a stĺpci 4");
-        String input = readLine().toUpperCase();
+        String input = readLine().trim().toUpperCase();
+        try {
+            handleInput(input);
+        } catch (WrongFormatException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
+    private void handleInput(String input) throws WrongFormatException {
         if (input.equals("X")) {
             System.exit(0);
         }
 
         Matcher matcher = PATTERN.matcher(input);
 
-        while (!matcher.matches()) {
-            System.out.println("Neplatný ťah!");
-            input = readLine().toUpperCase();
-            matcher = PATTERN.matcher(input);
+        if (!matcher.matches()) {
+            throw new WrongFormatException("Neplatný ťah!");
         }
 
         for (int i = 1; i <= matcher.groupCount(); i++) {
@@ -106,6 +112,10 @@ public class ConsoleUI implements UserInterface {
         }
         int row = matcher.group(2).charAt(0) - LETTER_ASCII;
         int column = Integer.parseInt(matcher.group(3));
+
+        if (row < 0 || row >= field.getRowCount() || column < 0 || column >= field.getColumnCount())
+            throw new WrongFormatException("Zadal si ťah mimo poľa!");
+
         if (matcher.group(1).equals("M")) {
             field.markTile(row, column);
         } else {
