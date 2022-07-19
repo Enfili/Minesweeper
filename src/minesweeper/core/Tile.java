@@ -30,7 +30,7 @@ public abstract class Tile {
      * Sets current current state of this tile.
      * @param state current state of this tile
      */
-    void setState(State state) {
+    public void setState(State state) {
         this.state = state;
     }
 

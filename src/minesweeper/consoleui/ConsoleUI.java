@@ -9,13 +9,15 @@ import java.util.regex.Pattern;
 
 import minesweeper.UserInterface;
 import minesweeper.core.Field;
+import minesweeper.core.GameState;
+import minesweeper.core.Tile;
 
 /**
  * Console user interface.
  */
 public class ConsoleUI implements UserInterface {
     public static final int LETTER_ASCII = 65;
-    public static final String REGEX_INPUT = "X|(M|O)([A-Z])(\\d)";
+    public static final Pattern PATTERN = Pattern.compile("([moMO])([a-zA-Z])(-?\\d+)");
     /** Playing field. */
     private Field field;
 
@@ -46,8 +48,14 @@ public class ConsoleUI implements UserInterface {
         this.format = "%" + (String.valueOf(field.getColumnCount()).length() + 1) + "s";
         do {
             update();
+            if ((field.getState() == GameState.SOLVED)) {
+                System.out.println("Si víťaz!");
+                System.exit(0);
+            } else if ((field.getState() == GameState.FAILED)) {
+                System.out.println("Prehral si a mal by si sa hanbiť!");
+                System.exit(0);
+            }
             processInput();
-//            throw new UnsupportedOperationException("Resolve the game state - winning or loosing condition.");
         } while(true);
     }
     
@@ -59,23 +67,18 @@ public class ConsoleUI implements UserInterface {
         int columnCount = field.getColumnCount();
         int rowCount = field.getRowCount();
 
+        System.out.println("Remaining number of mines: " + field.getRemainingMineCount());
+
         System.out.printf(format, "");
         for (int i = 0; i < columnCount; i++)
             System.out.printf("%2d", i);
         System.out.println();
-
         for (int i = 0; i < rowCount; i++) {
             System.out.printf("%2c", (LETTER_ASCII + i));
             for (int j = 0; j < columnCount; j++) {
                 System.out.printf(format, field.getTile(i, j));
             }
             System.out.println();
-        }
-
-        try {
-            System.in.read();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
     
@@ -85,29 +88,38 @@ public class ConsoleUI implements UserInterface {
      */
     private void processInput() {
         System.out.println("X – ukončenie hry, MA1 – označenie dlaždice v riadku A a stĺpci 1, OB4 – odkrytie dlaždice v riadku B a stĺpci 4");
-        String input = readLine();
+        String input = readLine().trim().toUpperCase();
+        try {
+            handleInput(input);
+        } catch (WrongFormatException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
-        Pattern pattern = Pattern.compile(REGEX_INPUT);
-        Matcher matcher = pattern.matcher(input);
+    private void handleInput(String input) throws WrongFormatException {
+        if (input.equals("X")) {
+            System.exit(0);
+        }
+
+        Matcher matcher = PATTERN.matcher(input);
 
         if (!matcher.matches()) {
-            System.out.println("Neplatný ťah!");
-            processInput();
+            throw new WrongFormatException("Neplatný ťah!");
+        }
+
+        for (int i = 1; i <= matcher.groupCount(); i++) {
+            System.out.println(matcher.group(i));
+        }
+        int row = matcher.group(2).charAt(0) - LETTER_ASCII;
+        int column = Integer.parseInt(matcher.group(3));
+
+        if (row < 0 || row >= field.getRowCount() || column < 0 || column >= field.getColumnCount())
+            throw new WrongFormatException("Zadal si ťah mimo poľa!");
+
+        if (matcher.group(1).equals("M")) {
+            field.markTile(row, column);
         } else {
-            if (input.charAt(0) == 'X') {
-
-            } else  {
-                String[] actions = new String[3];
-                for (int i = 0; i < matcher.groupCount(); i++) {
-                    actions[i] = matcher.group(i);
-                }
-                int row = actions[1].charAt(0) - LETTER_ASCII;
-                //int column = String.valueOf(actions[2].charAt(0));
-                if (actions[0].equals("M")) {
-                } else {
-
-                }
-            }
+            field.openTile(row, column);
         }
     }
 }
