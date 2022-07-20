@@ -1,5 +1,7 @@
 package minesweeper.core;
 
+import minesweeper.Minesweeper;
+
 import java.util.Random;
 
 /**

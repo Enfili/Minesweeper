@@ -38,6 +38,10 @@ public class BestTimes implements Iterable<BestTimes.PlayerTime> {
         return formatter.toString();
     }
 
+    private void reset() {
+        playerTimes.clear();
+    }
+
     /**
      * Player time.
      */

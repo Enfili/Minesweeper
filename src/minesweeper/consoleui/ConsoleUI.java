@@ -3,19 +3,19 @@ package minesweeper.consoleui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import minesweeper.Minesweeper;
 import minesweeper.UserInterface;
 import minesweeper.core.Field;
 import minesweeper.core.GameState;
-import minesweeper.core.Tile;
 
 /**
  * Console user interface.
  */
 public class ConsoleUI implements UserInterface {
+    private boolean run;
     public static final int LETTER_ASCII = 65;
     public static final Pattern PATTERN = Pattern.compile("([moMO])([a-zA-Z])(-?\\d+)");
     /** Playing field. */
@@ -44,19 +44,23 @@ public class ConsoleUI implements UserInterface {
      */
     @Override
     public void newGameStarted(Field field) {
+        run = true;
         this.field = field;
         this.format = "%" + (String.valueOf(field.getColumnCount()).length() + 1) + "s";
+        update();
         do {
+            processInput();
             update();
             if ((field.getState() == GameState.SOLVED)) {
                 System.out.println("Si víťaz!");
-                System.exit(0);
+                run = false;
+//                System.exit(0);
             } else if ((field.getState() == GameState.FAILED)) {
                 System.out.println("Prehral si a mal by si sa hanbiť!");
-                System.exit(0);
+                run = false;
+//                System.exit(0);
             }
-            processInput();
-        } while(true);
+        } while(run);
     }
     
     /**
@@ -80,6 +84,8 @@ public class ConsoleUI implements UserInterface {
             }
             System.out.println();
         }
+
+        System.out.printf("Hráš už %d sekúnd.%n", Minesweeper.getInstance().getPlayingSeconds());
     }
     
     /**
