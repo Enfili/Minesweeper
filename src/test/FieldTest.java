@@ -110,8 +110,9 @@ public class FieldTest {
 
         for (int i = 0; i < rowCount; i++) {
             for (int j = 0; j < columnCount; j++) {
-                if (field.getTile(i, j).getState() == Tile.State.OPEN)
-//                    assertInstanceOf(Clue, field.getTile(i, j), "Open tile is not of type Clue.");
+                if (field.getTile(i, j).getState() == Tile.State.OPEN) {
+                    assertInstanceOf(Clue.class, field.getTile(i, j).getClass(), "Open tile is not of type Clue.");
+                }
             }
         }
     }
