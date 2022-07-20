@@ -32,7 +32,7 @@ public class Minesweeper {
         instance = this;
 
         userInterface = new ConsoleUI();
-        Field field = new Field(9, 9, 1);
+        Field field = new Field(9, 9, 80);
         startMillis = System.currentTimeMillis();
         userInterface.newGameStarted(field);
 

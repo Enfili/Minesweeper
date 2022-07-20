@@ -121,6 +121,8 @@ public class Field {
         while (nbOfMines < mineCount) {
             int row = r.nextInt(rowCount);
             int column = r.nextInt(columnCount);
+//            tiles[row][column] = new Mine();
+//            nbOfMines++;
             if (tiles[row][column] == null) {
                 tiles[row][column] = new Mine();
                 nbOfMines++;
