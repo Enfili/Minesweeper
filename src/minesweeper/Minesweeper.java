@@ -2,6 +2,7 @@ package minesweeper;
 
 import minesweeper.consoleui.ConsoleUI;
 import minesweeper.core.Field;
+import minesweeper.core.TooManyMinesException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,7 +33,12 @@ public class Minesweeper {
         instance = this;
 
         userInterface = new ConsoleUI();
-        Field field = new Field(9, 9, 80);
+        Field field = null;
+        try {
+            field = new Field(9, 9, 80);
+        } catch (TooManyMinesException e) {
+            System.out.println(e.getMessage());
+        }
         startMillis = System.currentTimeMillis();
         userInterface.newGameStarted(field);
 

@@ -40,14 +40,15 @@ public class Field {
      * @param columnCount column count
      * @param mineCount   mine count
      */
-    public Field(int rowCount, int columnCount, int mineCount) {
+    public Field(int rowCount, int columnCount, int mineCount) throws TooManyMinesException {
         this.rowCount = rowCount;
         this.columnCount = columnCount;
-        this.mineCount = mineCount;
-        tiles = new Tile[rowCount][columnCount];
-
-        //generate the field content
-        generate();
+        if (mineCount <= columnCount * rowCount) {
+            this.mineCount = mineCount;
+            tiles = new Tile[rowCount][columnCount];
+            generate();
+        } else
+            throw new TooManyMinesException("Viac mín ako políčok.");
     }
 
     /**

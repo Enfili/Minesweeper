@@ -18,8 +18,8 @@ public class FieldTest {
     private int columnCount;
     private int minesCount;
 
-    @BeforeEach
-    public void initTests() {
+    @ BeforeEach
+    public void initTests() throws TooManyMinesException {
         rowCount = randomGenerator.nextInt(10) + 5;
         columnCount = rowCount;
         minesCount = Math.max(1, randomGenerator.nextInt(rowCount * columnCount));
