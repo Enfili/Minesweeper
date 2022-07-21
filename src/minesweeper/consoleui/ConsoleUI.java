@@ -7,9 +7,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import minesweeper.Minesweeper;
+import minesweeper.Settings;
 import minesweeper.UserInterface;
 import minesweeper.core.Field;
 import minesweeper.core.GameState;
+import minesweeper.core.TooManyMinesException;
 
 /**
  * Console user interface.
@@ -43,10 +45,29 @@ public class ConsoleUI implements UserInterface {
      * @param field field of mines and clues
      */
     @Override
-    public void newGameStarted(Field field) {
+    public void newGameStarted(Field field) throws TooManyMinesException {
         run = true;
         this.field = field;
         this.format = "%" + (String.valueOf(field.getColumnCount()).length() + 1) + "s";
+
+        System.out.println("Chceš si vybrať obtiažnosť?");
+        System.out.println("(1) BEGINNER, (2) INTERMEDIATE, (3) EXPERT");
+        String difficulty = readLine();
+        if (difficulty != null && !difficulty.equals("")) {
+            int level = Integer.parseInt(difficulty);
+            Settings s = null;
+            switch (level) {
+                case 1 -> s = Settings.BEGINNER;
+                case 2 -> s = Settings.INTERMEDIATE;
+                case 3 -> s = Settings.EXPERT;
+            }
+
+            if (s != null) {
+                Minesweeper.getInstance().setSetting(s);
+                field = new Field(s.getRowCount(), s.getColumnCount(), s.getMineCount());
+            }
+        }
+
         update();
         do {
             processInput();
@@ -67,7 +88,7 @@ public class ConsoleUI implements UserInterface {
      * Updates user interface - prints the field.
      */
     @Override
-    public void update() {
+    public void update() throws TooManyMinesException {
         int columnCount = field.getColumnCount();
         int rowCount = field.getRowCount();
 

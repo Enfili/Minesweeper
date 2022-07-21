@@ -15,10 +15,11 @@ import java.io.InputStreamReader;
 public class Minesweeper {
     private long startMillis;
     private BestTimes bestTimes = new BestTimes();
+    private Settings setting;
 
     private static Minesweeper instance;
 
-    public static Minesweeper getInstance() {
+    public static Minesweeper getInstance() throws TooManyMinesException {
         if (instance == null)
             new Minesweeper();
         return instance;
@@ -30,13 +31,14 @@ public class Minesweeper {
     /**
      * Constructor.
      */
-    private Minesweeper() {
+    private Minesweeper() throws TooManyMinesException {
         instance = this;
 
         userInterface = new ConsoleUI();
+        setting = Settings.load();
         Field field = null;
         try {
-            field = new Field(9, 9, 1);
+            field = new Field(setting.getRowCount(), setting.getColumnCount(), setting.getMineCount());
         } catch (TooManyMinesException e) {
             System.out.println(e.getMessage());
         }
@@ -65,11 +67,20 @@ public class Minesweeper {
         return bestTimes;
     }
 
+    public Settings getSetting() {
+        return setting;
+    }
+
+    public void setSetting(Settings setting) {
+        this.setting = setting;
+        setting.save();
+    }
+
     /**
      * Main method.
      * @param args arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws TooManyMinesException {
 //        System.out.println("Hello user with name: " + System.getProperty("user.name"));
         new Minesweeper();
     }
