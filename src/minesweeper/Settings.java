@@ -70,7 +70,13 @@ public class Settings implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        return this.equals(obj);
+        if (!(obj instanceof Settings))
+            return false;
+        if (this.columnCount != ((Settings) obj).columnCount
+            && this.rowCount != ((Settings) obj).rowCount
+            && this.mineCount != ((Settings) obj).mineCount)
+            return false;
+        return true;
     }
 
     @Override
