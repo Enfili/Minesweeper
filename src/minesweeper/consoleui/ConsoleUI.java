@@ -23,7 +23,7 @@ public class ConsoleUI implements UserInterface {
     /** Playing field. */
     private Field field;
 
-    private String format = "%2s";
+    private String format = "%3s";
 
     /** Input reader. */
     private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -51,20 +51,26 @@ public class ConsoleUI implements UserInterface {
         this.format = "%" + (String.valueOf(field.getColumnCount()).length() + 1) + "s";
 
         System.out.println("Chceš si vybrať obtiažnosť?");
-        System.out.println("(1) BEGINNER, (2) INTERMEDIATE, (3) EXPERT");
+        System.out.println("(0) PREVIOUS (1) BEGINNER, (2) INTERMEDIATE, (3) EXPERT");
         String difficulty = readLine();
         if (difficulty != null && !difficulty.equals("")) {
-            int level = Integer.parseInt(difficulty);
-            Settings s = null;
-            switch (level) {
-                case 1 -> s = Settings.BEGINNER;
-                case 2 -> s = Settings.INTERMEDIATE;
-                case 3 -> s = Settings.EXPERT;
-            }
+            try {
+                int level = Integer.parseInt(difficulty);
+                if (level != 0) {
+                    Settings s = null;
+                    switch (level) {
+                        case 1 -> s = Settings.BEGINNER;
+                        case 2 -> s = Settings.INTERMEDIATE;
+                        case 3 -> s = Settings.EXPERT;
+                    }
 
-            if (s != null) {
-                Minesweeper.getInstance().setSetting(s);
-                field = new Field(s.getRowCount(), s.getColumnCount(), s.getMineCount());
+                    if (s != null) {
+                        Minesweeper.getInstance().setSetting(s);
+                        this.field = new Field(s.getRowCount(), s.getColumnCount(), s.getMineCount());
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // empty on purpose
             }
         }
 
@@ -94,9 +100,9 @@ public class ConsoleUI implements UserInterface {
 
         System.out.println("Remaining number of mines: " + field.getRemainingMineCount());
 
-        System.out.printf(format, "");
+        System.out.print("  ");
         for (int i = 0; i < columnCount; i++)
-            System.out.printf("%2d", i);
+            System.out.printf("%3d", i);
         System.out.println();
         for (int i = 0; i < rowCount; i++) {
             System.out.printf("%2c", (LETTER_ASCII + i));
