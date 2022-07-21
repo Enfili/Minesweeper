@@ -22,7 +22,8 @@ public class FieldTest {
     public void initTests() throws TooManyMinesException {
         rowCount = randomGenerator.nextInt(10) + 5;
         columnCount = rowCount;
-        minesCount = Math.max(1, randomGenerator.nextInt(rowCount * columnCount));
+//        minesCount = Math.max(1, randomGenerator.nextInt(rowCount * columnCount));
+        minesCount = 3;
         field = new Field(rowCount, columnCount, minesCount);
     }
 
@@ -62,7 +63,7 @@ public class FieldTest {
         assertEquals(Tile.State.OPEN, field.getTile(row, column).getState(), "Tile is not open.");
 
         field.markTile(row, column);
-        assertEquals(Tile.State.OPEN, field.getTile(row, column).getState(), "Tile is marked after was opened.");
+        assertEquals(Tile.State.OPEN, field.getTile(row, column).getState(), "Tile is marked after it was already opened.");
     }
 
     @Test
@@ -76,45 +77,62 @@ public class FieldTest {
 
     @Test
     public void checkOpenClue() {
-        int rowValue = 0;
-        int columnValue = 0;
+        int rowValue = -1;
+        int columnValue = -1;
+        int rowZero = -1;
+        int columnZero = -1;
+        boolean value = false;
+        boolean zero = false;
         values:
         for (int i = 0; i < rowCount; i++) {
             for (int j = 0; j < columnCount; j++) {
-                if (field.getTile(i, j) instanceof Clue && ((Clue) field.getTile(i, j)).getValue() > 0) {
+                if (!value && field.getTile(i, j) instanceof Clue && ((Clue) field.getTile(i, j)).getValue() > 0) {
                     rowValue = i;
                     columnValue = j;
+                    value = true;
+                } else if (field.getTile(i, j) instanceof Clue && ((Clue) field.getTile(i, j)).getValue() == 0) {
+                    rowZero = i;
+                    columnZero = j;
+                    zero = true;
+                }
+                if (value && zero)
                     break values;
+            }
+        }
+
+        if (rowValue != -1) {
+            field.openTile(rowValue, columnValue);
+            int openTiles = 0;
+            for (int i = 0; i < rowCount; i++) {
+                for (int j = 0; j < columnCount; j++) {
+                    if (field.getTile(i, j).getState() == Tile.State.OPEN)
+                        openTiles++;
                 }
             }
+            assertEquals(1, openTiles, "Wrong number of opened tiles.");
+            assertEquals(GameState.PLAYING, field.getState(), "State of the game is not 'PLAYING' after one tile with nonzero value was open.");
         }
 
-        field.openTile(rowValue, columnValue);
-        int openTiles = 0;
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < columnCount; j++) {
-                if (field.getTile(i, j).getState() == Tile.State.OPEN)
-                    openTiles++;
-            }
-        }
-        assertEquals(1, openTiles, "Wrong number of opened tiles.");
-        assertEquals(GameState.PLAYING, field.getState(), "State of the game is not 'PLAYING'");
-
-        int rowZero = 0;
-        int columnZero = 0;
-        while (field.getTile(rowZero, columnZero).getState() != Tile.State.CLOSED) {
-            rowZero = randomGenerator.nextInt(rowCount);
-            columnZero = randomGenerator.nextInt(columnCount);
-        }
-        field.markTile(rowZero, columnZero);
-
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < columnCount; j++) {
-                if (field.getTile(i, j).getState() == Tile.State.OPEN) {
-                    assertInstanceOf(Clue.class, field.getTile(i, j).getClass(), "Open tile is not of type Clue.");
+        if (rowZero != -1) {
+            field.openTile(rowZero, columnZero);
+            for (int i = 0; i < rowCount; i++) {
+                for (int j = 0; j < columnCount; j++) {
+                    if (field.getTile(i, j).getState() == Tile.State.OPEN)
+                        assertEquals(Clue.class, field.getTile(i, j).getClass(), "While opening zero value tile, also not Clue type tiles were open.");
                 }
             }
+            assertEquals(GameState.PLAYING, field.getState(), "State of the game is not 'PLAYING' after opening tile with zero value.");
         }
+
+        int rowMark = 0;
+        int columnMark = 0;
+        while (field.getTile(rowMark, columnMark).getState() != Tile.State.CLOSED) {
+            rowMark = randomGenerator.nextInt(rowCount);
+            columnMark = randomGenerator.nextInt(columnCount);
+        }
+        field.markTile(rowMark, columnMark);
+        field.getTile(rowMark, columnMark);
+        assertEquals(Tile.State.MARKED, field.getTile(rowMark, columnMark).getState(), "Tile was open after it was already marked.");
     }
 
     @Test

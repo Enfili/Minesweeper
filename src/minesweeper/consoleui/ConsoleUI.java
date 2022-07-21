@@ -85,7 +85,8 @@ public class ConsoleUI implements UserInterface {
             System.out.println();
         }
 
-        System.out.printf("Hráš už %d sekúnd.%n", Minesweeper.getInstance().getPlayingSeconds());
+        Long curTime = System.currentTimeMillis();
+        System.out.printf("Hráš už %d sekúnd.%n", Minesweeper.getInstance().getPlayingSeconds(curTime));
     }
     
     /**

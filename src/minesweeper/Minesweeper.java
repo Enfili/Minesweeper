@@ -2,6 +2,7 @@ package minesweeper;
 
 import minesweeper.consoleui.ConsoleUI;
 import minesweeper.core.Field;
+import minesweeper.core.GameState;
 import minesweeper.core.TooManyMinesException;
 
 import java.io.BufferedReader;
@@ -35,26 +36,29 @@ public class Minesweeper {
         userInterface = new ConsoleUI();
         Field field = null;
         try {
-            field = new Field(9, 9, 80);
+            field = new Field(9, 9, 1);
         } catch (TooManyMinesException e) {
             System.out.println(e.getMessage());
         }
         startMillis = System.currentTimeMillis();
         userInterface.newGameStarted(field);
 
-        System.out.println("What is your name, mysterious winner?");
-        String playerName = null;
-        try {
-            playerName = new BufferedReader(new InputStreamReader(System.in)).readLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        Long endMillis = System.currentTimeMillis();
+        if (GameState.SOLVED == field.getState()) {
+            System.out.println("Aké je Vaše meno, záhadný víťaz?");
+            String playerName;
+            try {
+                playerName = new BufferedReader(new InputStreamReader(System.in)).readLine();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            bestTimes.addPlayerTime(playerName, getPlayingSeconds(endMillis));
+            System.out.println(bestTimes);
         }
-        bestTimes.addPlayerTime(playerName, getPlayingSeconds());
-        System.out.println(bestTimes);
     }
 
-    public int getPlayingSeconds() {
-        return (int) (System.currentTimeMillis() - startMillis) / 1000;
+    public int getPlayingSeconds(long endMillis) {
+        return (int) (endMillis - startMillis) / 1000;
     }
 
     public BestTimes getBestTimes() {
