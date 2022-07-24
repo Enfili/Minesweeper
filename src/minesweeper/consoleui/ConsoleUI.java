@@ -51,7 +51,7 @@ public class ConsoleUI implements UserInterface {
         this.format = "%" + (String.valueOf(field.getColumnCount()).length() + 1) + "s";
 
         System.out.println("Chceš si vybrať obtiažnosť?");
-        System.out.println("(0) PREVIOUS (1) BEGINNER, (2) INTERMEDIATE, (3) EXPERT");
+        System.out.println("(0) NIE (1) BEGINNER, (2) INTERMEDIATE, (3) EXPERT");
         String difficulty = readLine();
         if (difficulty != null && !difficulty.equals("")) {
             try {
