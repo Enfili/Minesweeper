@@ -33,6 +33,8 @@ public class Field {
      */
     private GameState state = GameState.PLAYING;
 
+    private long startMillis;
+
     /**
      * Constructor.
      *
@@ -137,6 +139,8 @@ public class Field {
                 }
             }
         }
+
+        startMillis = System.currentTimeMillis();
     }
 
     /**

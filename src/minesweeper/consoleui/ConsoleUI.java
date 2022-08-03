@@ -17,7 +17,6 @@ import minesweeper.core.TooManyMinesException;
  * Console user interface.
  */
 public class ConsoleUI implements UserInterface {
-    private boolean run;
     public static final int LETTER_ASCII = 65;
     public static final Pattern PATTERN = Pattern.compile("([moMO])([a-zA-Z])(-?\\d+)");
     /** Playing field. */
@@ -45,8 +44,7 @@ public class ConsoleUI implements UserInterface {
      * @param field field of mines and clues
      */
     @Override
-    public void newGameStarted(Field field) throws TooManyMinesException {
-        run = true;
+    public GameState newGameStarted(Field field) throws TooManyMinesException {
         this.field = field;
         this.format = "%" + (String.valueOf(field.getColumnCount()).length() + 1) + "s";
 
@@ -78,16 +76,17 @@ public class ConsoleUI implements UserInterface {
         do {
             processInput();
             update();
-            if ((field.getState() == GameState.SOLVED)) {
+            if ((this.field.getState() == GameState.SOLVED)) {
                 System.out.println("Si víťaz!");
-                run = false;
+                break;
 //                System.exit(0);
-            } else if ((field.getState() == GameState.FAILED)) {
+            } else if ((this.field.getState() == GameState.FAILED)) {
                 System.out.println("Prehral si a mal by si sa hanbiť!");
-                run = false;
+                break;
 //                System.exit(0);
             }
-        } while(run);
+        } while(true);
+        return this.field.getState();
     }
     
     /**

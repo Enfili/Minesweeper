@@ -34,6 +34,13 @@ public class Minesweeper {
     private Minesweeper() throws TooManyMinesException {
         instance = this;
 
+        System.out.println("Aké je Vaše meno, záhadný hráč?");
+        String playerName;
+        try {
+            playerName = new BufferedReader(new InputStreamReader(System.in)).readLine();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         userInterface = new ConsoleUI();
         setting = Settings.load();
         Field field = null;
@@ -43,19 +50,16 @@ public class Minesweeper {
             System.out.println(e.getMessage());
         }
         startMillis = System.currentTimeMillis();
-        userInterface.newGameStarted(field);
+        GameState gs = userInterface.newGameStarted(field);
 
         Long endMillis = System.currentTimeMillis();
-        if (GameState.SOLVED == field.getState()) {
-            System.out.println("Aké je Vaše meno, záhadný víťaz?");
-            String playerName;
-            try {
-                playerName = new BufferedReader(new InputStreamReader(System.in)).readLine();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if (GameState.SOLVED == gs) {
+            int score = field.getRowCount() * field.getColumnCount() * 10 - getPlayingSeconds(endMillis);
+            System.out.println(playerName + "Vyhral si so skóre: " + score);
             bestTimes.addPlayerTime(playerName, getPlayingSeconds(endMillis));
             System.out.println(bestTimes);
+        } else {
+            System.out.println(playerName + "Prehral si so skóre: " + 0);
         }
     }
 
