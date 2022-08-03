@@ -22,6 +22,7 @@ public class Minesweeper {
     private BestTimes bestTimes = new BestTimes();
     private Settings setting;
     private ScoreService scoreService = new ScoreServiceJDBC();
+    private final String GAME_NAME = "minesweeper";
 
     private static Minesweeper instance;
 
@@ -62,13 +63,15 @@ public class Minesweeper {
         if (GameState.SOLVED == gs) {
             int score = field.getRowCount() * field.getColumnCount() * 10 - getPlayingSeconds(endMillis);
             System.out.println(playerName + "Vyhral si so skóre: " + score);
-            scoreService.addScore(new Score("minesweeper", playerName, score, Date.from(Instant.now())));
+            scoreService.addScore(new Score(GAME_NAME, playerName, score, Date.from(Instant.now())));
             bestTimes.addPlayerTime(playerName, getPlayingSeconds(endMillis));
             System.out.println(bestTimes);
         } else {
             System.out.println(playerName + "Prehral si so skóre: " + 0);
-            scoreService.addScore(new Score("minesweeper", playerName, 0, Date.from(Instant.now())));
+            scoreService.addScore(new Score(GAME_NAME, playerName, 0, Date.from(Instant.now())));
         }
+
+        scoreService.getBestScores(GAME_NAME);
     }
 
     public int getPlayingSeconds(long endMillis) {
