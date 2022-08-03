@@ -1,13 +1,18 @@
 package minesweeper;
 
+import entity.Score;
 import minesweeper.consoleui.ConsoleUI;
 import minesweeper.core.Field;
 import minesweeper.core.GameState;
 import minesweeper.core.TooManyMinesException;
+import service.ScoreService;
+import service.ScoreServiceJDBC;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Date;
+import java.time.Instant;
 
 /**
  * Main application class.
@@ -16,6 +21,7 @@ public class Minesweeper {
     private long startMillis;
     private BestTimes bestTimes = new BestTimes();
     private Settings setting;
+    private ScoreService scoreService = new ScoreServiceJDBC();
 
     private static Minesweeper instance;
 
@@ -56,10 +62,12 @@ public class Minesweeper {
         if (GameState.SOLVED == gs) {
             int score = field.getRowCount() * field.getColumnCount() * 10 - getPlayingSeconds(endMillis);
             System.out.println(playerName + "Vyhral si so skóre: " + score);
+            scoreService.addScore(new Score("minesweeper", playerName, score, Date.from(Instant.now())));
             bestTimes.addPlayerTime(playerName, getPlayingSeconds(endMillis));
             System.out.println(bestTimes);
         } else {
             System.out.println(playerName + "Prehral si so skóre: " + 0);
+            scoreService.addScore(new Score("minesweeper", playerName, 0, Date.from(Instant.now())));
         }
     }
 
