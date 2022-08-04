@@ -1,12 +1,12 @@
 package minesweeper;
 
+import entity.Comment;
 import entity.Score;
 import minesweeper.consoleui.ConsoleUI;
 import minesweeper.core.Field;
 import minesweeper.core.GameState;
 import minesweeper.core.TooManyMinesException;
-import service.ScoreService;
-import service.ScoreServiceJDBC;
+import service.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +21,8 @@ public class Minesweeper {
     private long startMillis;
     private BestTimes bestTimes = new BestTimes();
     private Settings setting;
-    private ScoreService scoreService = new ScoreServiceJDBC();
+    private final ScoreService scoreService = new ScoreServiceJDBC();
+    private final CommentService commentService = new CommentServiceFile();
     private final String GAME_NAME = "minesweeper";
 
     private static Minesweeper instance;
@@ -65,13 +66,22 @@ public class Minesweeper {
             System.out.println(playerName + " vyhral si so skóre: " + score);
             scoreService.addScore(new Score(GAME_NAME, playerName, score, Date.from(Instant.now())));
             bestTimes.addPlayerTime(playerName, getPlayingSeconds(endMillis));
-            System.out.println(bestTimes);
+//            System.out.println(bestTimes);
         } else {
             System.out.println(playerName + " prehral si so skóre: " + 0);
             scoreService.addScore(new Score(GAME_NAME, playerName, 0, Date.from(Instant.now())));
         }
+        scoreService.getBestScores(GAME_NAME).forEach(n -> System.out.println(n.getGame() + " " + n.getUsername() + " " + n.getPoints() + " " + n.getPlayedOn()));
 
-        scoreService.getBestScores(GAME_NAME).stream().forEach(n -> System.out.println(n.getGame() + " " + n.getUsername() + " " + n.getPoints() + " " + n.getPlayedOn()));
+        System.out.println("\nAký je tvoj komentár?");
+        String comment;
+        try {
+            comment = new BufferedReader(new InputStreamReader(System.in)).readLine();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        commentService.addComment(new Comment(GAME_NAME, playerName, comment, Date.from(Instant.now())));
+        commentService.getComments(GAME_NAME).forEach(n -> System.out.println(n.getCommentedOn() + ": " + n.getComment() + "\n" + n.getUsername()));
     }
 
     public int getPlayingSeconds(long endMillis) {
