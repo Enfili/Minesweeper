@@ -62,16 +62,16 @@ public class Minesweeper {
         Long endMillis = System.currentTimeMillis();
         if (GameState.SOLVED == gs) {
             int score = field.getRowCount() * field.getColumnCount() * 10 - getPlayingSeconds(endMillis);
-            System.out.println(playerName + "Vyhral si so skóre: " + score);
+            System.out.println(playerName + " vyhral si so skóre: " + score);
             scoreService.addScore(new Score(GAME_NAME, playerName, score, Date.from(Instant.now())));
             bestTimes.addPlayerTime(playerName, getPlayingSeconds(endMillis));
             System.out.println(bestTimes);
         } else {
-            System.out.println(playerName + "Prehral si so skóre: " + 0);
+            System.out.println(playerName + " prehral si so skóre: " + 0);
             scoreService.addScore(new Score(GAME_NAME, playerName, 0, Date.from(Instant.now())));
         }
 
-        scoreService.getBestScores(GAME_NAME);
+        scoreService.getBestScores(GAME_NAME).stream().forEach(n -> System.out.println(n.getGame() + " " + n.getUsername() + " " + n.getPoints() + " " + n.getPlayedOn()));
     }
 
     public int getPlayingSeconds(long endMillis) {

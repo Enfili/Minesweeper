@@ -5,7 +5,7 @@ import java.io.*;
 public class Settings implements Serializable {
     private final int rowCount, columnCount, mineCount;
     public static final String SETTING_FILE = System.getProperty("user.home") + System.getProperty("file.separator") + "minesweeper.settings";
-    public static final Settings BEGINNER = new Settings(9, 9, 10);
+    public static final Settings BEGINNER = new Settings(9, 9, 0);
     public static final Settings INTERMEDIATE = new Settings(16, 16, 40);
     public static final Settings EXPERT = new Settings(16, 30, 99);
 
