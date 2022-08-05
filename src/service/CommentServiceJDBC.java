@@ -28,7 +28,7 @@ public class CommentServiceJDBC implements CommentService {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new GameStudioException();
+            throw new GameStudioException(e);
         }
     }
 
@@ -46,7 +46,7 @@ public class CommentServiceJDBC implements CommentService {
                 return comments;
             }
         } catch (SQLException e) {
-            throw new GameStudioException();
+            throw new GameStudioException(e);
         }
     }
 
@@ -57,7 +57,7 @@ public class CommentServiceJDBC implements CommentService {
         {
             statement.executeUpdate(RESET);
         } catch (SQLException e) {
-            throw new GameStudioException();
+            throw new GameStudioException(e);
         }
     }
 }

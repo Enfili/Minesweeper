@@ -1,6 +1,7 @@
 package minesweeper;
 
 import entity.Comment;
+import entity.Rating;
 import entity.Score;
 import minesweeper.consoleui.ConsoleUI;
 import minesweeper.core.Field;
@@ -22,7 +23,8 @@ public class Minesweeper {
     private BestTimes bestTimes = new BestTimes();
     private Settings setting;
     private final ScoreService scoreService = new ScoreServiceJDBC();
-    private final CommentService commentService = new CommentServiceFile();
+    private final CommentService commentService = new CommentServiceJDBC();
+    private final RatingService ratingService = new RatingServiceJDBC();
     private final String GAME_NAME = "minesweeper";
 
     private static Minesweeper instance;
@@ -42,13 +44,7 @@ public class Minesweeper {
     private Minesweeper() throws TooManyMinesException {
         instance = this;
 
-        System.out.println("Aké je Vaše meno, záhadný hráč?");
-        String playerName;
-        try {
-            playerName = new BufferedReader(new InputStreamReader(System.in)).readLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String playerName = username();
         userInterface = new ConsoleUI();
         setting = Settings.load();
         Field field = null;
@@ -73,15 +69,63 @@ public class Minesweeper {
         }
         scoreService.getBestScores(GAME_NAME).forEach(n -> System.out.println(n.getGame() + " " + n.getUsername() + " " + n.getPoints() + " " + n.getPlayedOn()));
 
-        System.out.println("\nAký je tvoj komentár?");
-        String comment;
+        handleComments(playerName);
+        handleRating(playerName);
+    }
+
+    private String username() {
+        StringBuilder playerName = new StringBuilder();
         try {
-            comment = new BufferedReader(new InputStreamReader(System.in)).readLine();
+            while (playerName.isEmpty() || playerName.length() > 64) {
+                if (!playerName.isEmpty()) {
+                    playerName.delete(0, playerName.length());
+                }
+                System.out.println("Aké je Vaše meno, záhadný hráč?");
+                playerName.append(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            return playerName.toString();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Nesprávny vstup!");
         }
-        commentService.addComment(new Comment(GAME_NAME, playerName, comment, Date.from(Instant.now())));
-        commentService.getComments(GAME_NAME).forEach(n -> System.out.println(n.getCommentedOn() + ": " + n.getComment() + "\n" + n.getUsername()));
+        return null;
+    }
+
+    private void handleRating(String playerName) {
+        int rating = 0;
+        try {
+            while (rating < 1 || rating > 5) {
+                System.out.println("Aké je tvoje hodnotenie tejto čarovnej hry? (Od 1 do 5.)");
+                rating = Integer.parseInt(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            System.out.println("Aké je tvoje hodnotenie tejto čarovnej hry? (Od 1 do 5.)");
+            rating = Integer.parseInt(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            ratingService.setRating(new Rating(GAME_NAME, playerName, rating, Date.from(Instant.now())));
+            System.out.println("Priemerné hodnotenie hry: " + ratingService.getAverageRating(GAME_NAME));
+        } catch (IOException e) {
+            System.out.println("Nesprávny vstup!");
+        } catch (GameStudioException e) {
+            System.out.println("Nepodarilo sa nastaviť rating.");
+        }
+
+    }
+
+    private void handleComments(String playerName) {
+        StringBuilder comment = new StringBuilder();
+        try {
+            while (comment.isEmpty() || comment.length() > 1000) {
+                if (!comment.isEmpty()) {
+                    comment.delete(0, comment.length());
+                }
+                System.out.println("\nAký je tvoj komentár?");
+                comment.append(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            commentService.addComment(new Comment(GAME_NAME, playerName, comment.toString(), Date.from(Instant.now())));
+            commentService.getComments(GAME_NAME).forEach(n -> System.out.println(n.getCommentedOn() + ": " + n.getComment() + "\n" + n.getUsername()));
+        } catch (IOException e) {
+            System.out.println("Nesprávny vstup!");
+        } catch (GameStudioException e) {
+            System.out.println("Nepodarilo sa pridať komentár alebo získať komentáre z databázy.");
+        }
     }
 
     public int getPlayingSeconds(long endMillis) {

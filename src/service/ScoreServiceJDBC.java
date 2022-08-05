@@ -16,21 +16,21 @@ public class ScoreServiceJDBC implements ScoreService {
     private static final String STATEMENT_ADD_SCORES = "INSERT INTO score VALUES (?, ?, ?, ?)";
     public static final String RESET = "DELETE FROM score";
 
-    public static void main(String[] args) {
-        try {
-            var con = DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
-            PreparedStatement statement = con.prepareStatement(STATEMENT_BEST_SCORES);
-            statement.setString(1, "minesweeper");
-            ResultSet rs = statement.executeQuery();
-            List<Score> scores = new ArrayList<>();
-            while (rs.next()) {
-                scores.add(new Score(rs.getString(1), rs.getString(2), rs.getInt(3), rs.getTimestamp(4)));
-            }
-            scores.stream().forEach(n -> System.out.println(n));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            var con = DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
+//            PreparedStatement statement = con.prepareStatement(STATEMENT_BEST_SCORES);
+//            statement.setString(1, "minesweeper");
+//            ResultSet rs = statement.executeQuery();
+//            List<Score> scores = new ArrayList<>();
+//            while (rs.next()) {
+//                scores.add(new Score(rs.getString(1), rs.getString(2), rs.getInt(3), rs.getTimestamp(4)));
+//            }
+//            scores.stream().forEach(n -> System.out.println(n));
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     @Override
     public void addScore(Score score) {
@@ -44,7 +44,7 @@ public class ScoreServiceJDBC implements ScoreService {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new GameStudioException();
+            throw new GameStudioException(e);
         }
     }
 
@@ -62,7 +62,7 @@ public class ScoreServiceJDBC implements ScoreService {
                 return scores;
             }
         } catch (SQLException e) {
-            throw new GameStudioException();
+            throw new GameStudioException(e);
         }
     }
 
@@ -73,7 +73,7 @@ public class ScoreServiceJDBC implements ScoreService {
         {
             statement.executeUpdate(RESET);
         } catch (SQLException e) {
-            throw new GameStudioException();
+            throw new GameStudioException(e);
         }
     }
 }
