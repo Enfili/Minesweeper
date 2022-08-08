@@ -13,17 +13,20 @@ public class Puzzle {
     ConsoleUI ui;
     Field field;
 
-    private final ScoreService scoreService = new ScoreServiceJDBC();
-    private final CommentService commentService = new CommentServiceFile();
+
     private final String GAME_NAME = "kamene";
 
     public Puzzle() {
+        final ScoreService scoreService = new ScoreServiceJDBC();
+        final CommentService commentService = new CommentServiceJDBC();
+        final RatingService ratingService = new RatingServiceJDBC();
+
         ui = new ConsoleUI();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         do {
-            System.out.println("Do you wish to start (new) game or (load) previous one or have a look at best (times) or (comments) or you can (exit) game?");
+            System.out.println("Do you wish to start (new) game or (load) previous one or have a look at best (times) or (comments) or average (rating) of the game or you can (exit) game?");
             int rows = 0;
             int columns = 0;
             try {
@@ -51,11 +54,15 @@ public class Puzzle {
 //                    System.out.println(bt);
                 } else if (input.equals("comments")) {
                     commentService.getComments(GAME_NAME).forEach(n -> System.out.println(n.getCommentedOn() + ": " + n.getComment() + "\n" + n.getUsername()));
+                } else if (input.equals("rating")) {
+                    System.out.printf("Average rating of the game is: %d%n", ratingService.getAverageRating(GAME_NAME));
                 } else if (input.equals("exit")) {
                     System.exit(0);
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println(e.getMessage());
+            } catch (GameStudioException e) {
+                System.out.println("Unable to access database! (" + e.getMessage() + ")");
             }
         }while (true);
     }

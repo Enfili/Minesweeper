@@ -8,4 +8,6 @@ public interface UserInterface {
     GameState newGameStarted(Field field) throws TooManyMinesException;
 
     void update() throws TooManyMinesException;
+
+    void play() throws TooManyMinesException;
 }

@@ -3,15 +3,20 @@ package minesweeper.consoleui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Date;
+import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import entity.Comment;
+import entity.Rating;
+import entity.Score;
 import minesweeper.Minesweeper;
-import minesweeper.Settings;
 import minesweeper.UserInterface;
 import minesweeper.core.Field;
 import minesweeper.core.GameState;
 import minesweeper.core.TooManyMinesException;
+import service.*;
 
 /**
  * Console user interface.
@@ -23,6 +28,14 @@ public class ConsoleUI implements UserInterface {
     private Field field;
 
     private String format = "%3s";
+
+    // originally in Minesweeper.java
+    private long startMillis;
+    private Settings setting;
+    private final ScoreService scoreService = new ScoreServiceJDBC();
+    private final CommentService commentService = new CommentServiceJDBC();
+    private final RatingService ratingService = new RatingServiceJDBC();
+    private final String GAME_NAME = "minesweeper";
 
     /** Input reader. */
     private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -63,8 +76,11 @@ public class ConsoleUI implements UserInterface {
                     }
 
                     if (s != null) {
-                        Minesweeper.getInstance().setSetting(s);
-                        this.field = new Field(s.getRowCount(), s.getColumnCount(), s.getMineCount());
+                        this.setting = s;
+                        this.setting.save();
+//                        Minesweeper.getInstance().setSetting(s);
+//                        setSetting(s);
+//                        this.field = new Field(s.getRowCount(), s.getColumnCount(), s.getMineCount());
                     }
                 }
             } catch (NumberFormatException e) {
@@ -93,7 +109,7 @@ public class ConsoleUI implements UserInterface {
      * Updates user interface - prints the field.
      */
     @Override
-    public void update() throws TooManyMinesException {
+    public void update() {
         int columnCount = field.getColumnCount();
         int rowCount = field.getRowCount();
 
@@ -112,9 +128,97 @@ public class ConsoleUI implements UserInterface {
         }
 
         Long curTime = System.currentTimeMillis();
-        System.out.printf("Hráš už %d sekúnd.%n", Minesweeper.getInstance().getPlayingSeconds(curTime));
+        System.out.printf("Hráš už %d sekúnd.%n", ((curTime - startMillis) / 1000));
+//        System.out.printf("Hráš už %d sekúnd.%n", Minesweeper.getInstance().getPlayingSeconds(curTime));
+//        System.out.printf("Hráš už %d sekúnd.%n", getPlayingSeconds(curTime));
     }
-    
+
+    @Override
+    public void play() throws TooManyMinesException {
+        String playerName = username();
+
+        setting = Settings.load();
+        Field field = null;
+        try {
+            field = new Field(setting.getRowCount(), setting.getColumnCount(), setting.getMineCount());
+        } catch (TooManyMinesException e) {
+            System.out.println(e.getMessage());
+        }
+
+        startMillis = System.currentTimeMillis();
+        GameState gs = newGameStarted(field);
+
+        Long endMillis = System.currentTimeMillis();
+        if (GameState.SOLVED == gs) {
+            int score = field.getRowCount() * field.getColumnCount() * 10 - getPlayingSeconds(endMillis);
+            System.out.println(playerName + " vyhral si so skóre: " + score);
+            scoreService.addScore(new Score(GAME_NAME, playerName, score, Date.from(Instant.now())));
+        } else {
+            System.out.println(playerName + " prehral si so skóre: " + 0);
+            scoreService.addScore(new Score(GAME_NAME, playerName, 0, Date.from(Instant.now())));
+        }
+        scoreService.getBestScores(GAME_NAME).forEach(n -> System.out.println(n.getGame() + " " + n.getUsername() + " " + n.getPoints() + " " + n.getPlayedOn()));
+
+        handleComments(playerName);
+        handleRating(playerName);
+    }
+
+    private String username() {
+        StringBuilder playerName = new StringBuilder();
+        try {
+            while (playerName.isEmpty() || playerName.length() > 64) {
+                if (!playerName.isEmpty()) {
+                    playerName.delete(0, playerName.length());
+                }
+                System.out.println("Aké je Vaše meno, záhadný hráč?");
+                playerName.append(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            return playerName.toString();
+        } catch (IOException e) {
+            System.out.println("Nesprávny vstup! (" + e.getMessage() + ")");
+        }
+        return null;
+    }
+
+    private void handleRating(String playerName) {
+        int rating = 0;
+        try {
+            while (rating < 1 || rating > 5) {
+                System.out.println("Aké je tvoje hodnotenie tejto čarovnej hry? (Od 1 do 5.)");
+                rating = Integer.parseInt(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            ratingService.setRating(new Rating(GAME_NAME, playerName, rating, Date.from(Instant.now())));
+            System.out.println("Priemerné hodnotenie hry: " + ratingService.getAverageRating(GAME_NAME));
+        } catch (IOException e) {
+            System.out.println("Nesprávny vstup! (" + e.getMessage() + ")");
+        } catch (GameStudioException e) {
+            System.out.println("Nepodarilo sa nastaviť rating v databáze. (" + e.getMessage() + ")");
+        }
+    }
+
+    private void handleComments(String playerName) {
+        StringBuilder comment = new StringBuilder();
+        try {
+            while (comment.isEmpty() || comment.length() > 1000) {
+                if (!comment.isEmpty()) {
+                    comment.delete(0, comment.length());
+                }
+                System.out.println("\nAký je tvoj komentár?");
+                comment.append(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            commentService.addComment(new Comment(GAME_NAME, playerName, comment.toString(), Date.from(Instant.now())));
+            commentService.getComments(GAME_NAME).forEach(n -> System.out.println(n.getCommentedOn() + ": " + n.getComment() + "\n" + n.getUsername()));
+        } catch (IOException e) {
+            System.out.println("Nesprávny vstup! (" + e.getMessage() + ")");
+        } catch (GameStudioException e) {
+            System.out.println("Nepodarilo sa pridať komentár alebo získať komentáre z databázy. (" + e.getMessage() + ")");
+        }
+    }
+
+    private int getPlayingSeconds(long endMillis) {
+        return (int) (endMillis - startMillis) / 1000;
+    }
+
     /**
      * Processes user input.
      * Reads line from console and does the action on a playing field according to input string.

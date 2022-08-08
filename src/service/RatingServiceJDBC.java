@@ -23,7 +23,6 @@ public class RatingServiceJDBC implements RatingService {
     private static final String USER = "postgres";
     private static final String PASSWORD = "postgres";
 
-
     private static final String STATEMENT_DELETE_RATING = "DELETE FROM rating WHERE game=? AND username=?";
     private static final String STATEMENT_GET_AVERAGE = "SELECT ROUND(AVG(rating)) FROM rating WHERE game=?";
     private static final String STATEMENT_GET_RATING = "SELECT rating FROM rating WHERE game=? AND username=?";
@@ -76,19 +75,6 @@ public class RatingServiceJDBC implements RatingService {
             statement.setString(2, rating.getUsername());
             statement.setInt(3, rating.getRating());
             statement.setTimestamp(4, new Timestamp(rating.getRatedOn().getTime()));
-
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new GameStudioException(e);
-        }
-    }
-
-    private void deleteRating(Rating rating) {
-        try (var connection = DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
-             var statement = connection.prepareStatement(STATEMENT_DELETE_RATING))
-        {
-            statement.setString(1, rating.getGame());
-            statement.setString(2, rating.getUsername());
 
             statement.executeUpdate();
         } catch (SQLException e) {

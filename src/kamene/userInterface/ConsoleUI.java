@@ -1,6 +1,7 @@
 package kamene.userInterface;
 
 import entity.Comment;
+import entity.Rating;
 import entity.Score;
 import kamene.core.Field;
 import kamene.core.Stone;
@@ -25,7 +26,8 @@ public class ConsoleUI {
 //    private BestTimes bestTimes = new BestTimes();
 
     private final ScoreService scoreService = new ScoreServiceJDBC();
-    private final CommentService commentService = new CommentServiceFile();
+    private final CommentService commentService = new CommentServiceJDBC();
+    private final RatingService ratingService = new RatingServiceJDBC();
     private final String GAME_NAME = "kamene";
 
     public void newGame(Field field) {
@@ -79,21 +81,17 @@ public class ConsoleUI {
         System.out.println("Congratulations. YOU ARE A WINNER!");
         int gameTime = (int) (System.currentTimeMillis() - startTime) / 1000;
         System.out.printf("It took you %d seconds to conquer this puzzle!%n", gameTime);
-        System.out.println("What is your name, oh, mysterious player?");
+        String name = username();
         try {
-            String name = br.readLine();
-            int score = field.getColumnCount() * field.getRowCount() - gameTime;
-            scoreService.addScore(new Score(GAME_NAME, name, score, Date.from(Instant.now())));
-
-            System.out.println("Do you have anything else on your mind?");
-            String comment = br.readLine();
-            commentService.addComment(new Comment(GAME_NAME, name, comment, Date.from(Instant.now())));
-//            bestTimes.addPlayer(name, gameTime);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            scoreService.addScore(new Score(GAME_NAME, name, gameTime, Date.from(Instant.now())));
+        } catch (GameStudioException e) {
+            System.out.println("Unable to access the database. (" + e.getMessage() + ")");
         }
+        handleAddComments(name);
+        handleAddRating(name);
+
         do {
-            System.out.println("Do you wish to start (new) game or (exit) game or have a look at best (times) or (comments)?");
+            System.out.println("Do you wish to start (new) game or (exit) game or have a look at best (times) or (comments) or average (rating) of the game?");
             try {
                 String input = br.readLine().trim().toLowerCase();
                 if (input.equals("exit")) {
@@ -107,13 +105,67 @@ public class ConsoleUI {
 //                    System.out.println(bestTimes);
                 } else if (input.equals("comments")) {
                     commentService.getComments(GAME_NAME).forEach(n -> System.out.println(n.getCommentedOn() + ": " + n.getComment() + "\n" + n.getUsername()));
+                } else if (input.equals("rating")) {
+                    System.out.printf("Average rating of the game is: %d%n", ratingService.getAverageRating(GAME_NAME));
                 } else {
                     System.out.println("Your input is not correct. Choose again and choose wisely!");
                 }
             } catch (IOException e) {
-                // intentionally left blank
+                System.out.println(e.getMessage());
+            } catch (GameStudioException e) {
+                System.out.println("Unable to access database! (" + e.getMessage() + ")");
             }
         } while(true);
+    }
+
+    private String username() {
+        StringBuilder playerName = new StringBuilder();
+        try {
+            while (playerName.isEmpty() || playerName.length() > 64) {
+                if (!playerName.isEmpty()) {
+                    playerName.delete(0, playerName.length());
+                }
+                System.out.println("What is your name, oh, mysterious player?");
+                playerName.append(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            return playerName.toString();
+        } catch (IOException e) {
+            System.out.println("Incorrect input! (" + e.getMessage() + ")");
+        }
+        return null;
+    }
+
+    private void handleAddRating(String playerName) {
+        int rating = 0;
+        try {
+            while (rating < 1 || rating > 5) {
+                System.out.println("How do you rate this magnificient game? (5 - the best, 1 - the worst)");
+                rating = Integer.parseInt(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            ratingService.setRating(new Rating(GAME_NAME, playerName, rating, Date.from(Instant.now())));
+        } catch (IOException e) {
+            System.out.println("Incorrect input! (" + e.getMessage() + ")");
+        } catch (GameStudioException e) {
+            System.out.println("Unable to set rating in the database. (" + e.getMessage() + ")");
+        }
+    }
+
+    private void handleAddComments(String playerName) {
+        StringBuilder comment = new StringBuilder();
+        try {
+            while (comment.isEmpty() || comment.length() > 1000) {
+                if (!comment.isEmpty()) {
+                    comment.delete(0, comment.length());
+                }
+                System.out.println("Do you have anything else on your mind?");
+                comment.append(new BufferedReader(new InputStreamReader(System.in)).readLine());
+            }
+            commentService.addComment(new Comment(GAME_NAME, playerName, comment.toString(), Date.from(Instant.now())));
+        } catch (IOException e) {
+            System.out.println("Incorrect input! (" + e.getMessage() + ")");
+        } catch (GameStudioException e) {
+            System.out.println("Unable to add comment to the database. (" + e.getMessage() + ")");
+        }
     }
 
     private void processInput() {
